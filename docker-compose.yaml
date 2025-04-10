@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  backend:
+    build: .
+    volumes:
+      - .:/app
+      - uploads_data:/app/uploads
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+
+volumes:
+  uploads_data:
+    # Uncomment the following lines to use a bind mount instead of a named volume
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   device: ./uploads
+    #   o: bind

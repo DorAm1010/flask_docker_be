@@ -1,20 +1,24 @@
-import os
 from flask import Flask
-from flask_migrate import Migrate
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
-
-mongo_uri = os.getenv('MONGO_URI')
-client = MongoClient(mongo_uri, server_api=ServerApi('1'))
-db = client.healthpulse
+from flask import Flask
+from models import db
 
 
 def create_app():
     """Create and configure the flask application"""
     app = Flask(__name__)
     app.config['DATABASE_URI'] = '123'
-    from routes import register_routes
-    register_routes(app, db)
-    migrate = Migrate(app, db)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Or your preferred DB
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+
+    from routes import user_bp, blog_bp
+    app.register_blueprint(user_bp)
+    app.register_blueprint(blog_bp)
+
+    # migrate = Migrate(app, db)
 
     return app
