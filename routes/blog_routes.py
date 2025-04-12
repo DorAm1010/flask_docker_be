@@ -4,7 +4,7 @@ from models import db
 from models.blog import Blog
 import os
 
-blog_bp = Blueprint('blog', __name__, url_prefix='/blog')
+blog_bp = Blueprint('blog', __name__, url_prefix='/blogs')
 
 # Directory to save uploaded images
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
@@ -12,7 +12,7 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-@blog_bp.route('/', methods=['POST'])
+@blog_bp.route('/create-blog', methods=['POST'])
 def create_blog():
     """Create a new blog entry."""
     title = request.form.get('title')
@@ -57,7 +57,7 @@ def get_blog_by_id(blog_id):
         "image_url": blog.image_url
     }), status.HTTP_200_OK
 
-@blog_bp.route('/<str:blog_titlee>', methods=['GET'])
+@blog_bp.route('/<string:blog_title>', methods=['GET'])
 def get_blog_by_title(blog_titlee):
     """Get a single blog entry by its ID."""
     blog = Blog.query.get(blog_titlee)
@@ -123,7 +123,7 @@ def delete_blog(blog_id):
     """Delete a blog entry."""
     blog = Blog.query.get(blog_id)
     if not blog:
-        return jsonify({"error": "Blog not found"}), 404
+        return jsonify({"error": "Blog not found"}), status.HTTP_404_NOT_FOUND
 
     db.session.delete(blog)
     db.session.commit()

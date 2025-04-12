@@ -13,11 +13,14 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
+        from models.user import User
+        from models.blog import Blog
         db.create_all()
 
-    from routes import user_bp, blog_bp
-    app.register_blueprint(user_bp)
-    app.register_blueprint(blog_bp)
+        from routes.auth_routes import auth_bp
+        from routes.blog_routes import blog_bp
+        app.register_blueprint(auth_bp)
+        app.register_blueprint(blog_bp)
 
     # migrate = Migrate(app, db)
 

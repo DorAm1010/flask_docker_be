@@ -1,11 +1,13 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import deferred
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy.ext.declarative import declarative_base
+from models import db
 
-Base = declarative_base()
 
-class User(Base):
+# Base = declarative_base()
+
+class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String(64), unique=True, nullable=False)
