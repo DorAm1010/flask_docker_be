@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import Flask
 from models import db
+from flask_jwt_extended import JWTManager
 
 
 def create_app():
@@ -9,7 +10,8 @@ def create_app():
     app.config['DATABASE_URI'] = '123'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Or your preferred DB
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    app.config['JWT_SECRET_KEY'] = 'super-secret'  # Should come from your .env in production
+    jwt = JWTManager(app)
     db.init_app(app)
 
     with app.app_context():

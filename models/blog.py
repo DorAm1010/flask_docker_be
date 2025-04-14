@@ -15,16 +15,17 @@ class Blog(db.Model):
     image = Column(String(256))
 
 
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
-        self.set_password(password)
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def __init__(self, title, content, image):
+        self.title = title
+        self.content = content
+        self.image = image
 
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<Blog {self.title}>'
+    
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'content': self.content,
+            'image_url': self.image
+        }

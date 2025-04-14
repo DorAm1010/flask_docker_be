@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint
 from flask_api import status
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from models import db
 from models.blog import Blog
 import os
@@ -13,6 +14,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 
 @blog_bp.route('/create-blog', methods=['POST'])
+@jwt_required() 
 def create_blog():
     """Create a new blog entry."""
     title = request.form.get('title')
@@ -58,14 +60,13 @@ def get_blog_by_id(blog_id):
     }), status.HTTP_200_OK
 
 @blog_bp.route('/<string:blog_title>', methods=['GET'])
-def get_blog_by_title(blog_titlee):
+def get_blog_by_title(blog_title):
     """Get a single blog entry by its ID."""
-    blog = Blog.query.get(blog_titlee)
+    blog = Blog.query.get(blog_title)
     if not blog:
-        return jsonify({"error": f"Blog with title {blog_titlee} not found"}), status.HTTP_404_NOT_FOUND
+        return jsonify({"error": f"Blog with title {blog_title} not found"}), status.HTTP_404_NOT_FOUND
 
     return jsonify({
-        "id": blog.id,
         "title": blog.title,
         "content": blog.content,
         "image_url": blog.image_url
@@ -76,17 +77,18 @@ def get_blog_by_title(blog_titlee):
 def get_all_blogs():
     """Get a list of all blog entries."""
     blogs = Blog.query.all()
-    # results = []
-    # for blog in blogs:
-    #     results.append({
-    #         "id": blog.id,
-    #         "title": blog.title,
-    #         "content": blog.content,
-    #         "image_url": blog.image_url
-    #     })
     return jsonify(blogs), status.HTTP_200_OK
 
+@blog_bp.route('/my-blogs', methods=['GET'])
+@jwt_required()  # This enforces JWT protection on this route.
+def get_user_blogs():
+    current_user_id = get_jwt_identity()  # Retrieve the identity (e.g., user ID) from the token.
+    user_blogs = Blog.query.filter_by(user_id=current_user_id).all()
+    # Assume each Blog model has a `to_dict()` method for serialization
+    return jsonify([blog.to_dict() for blog in user_blogs]), 200
+
 @blog_bp.route('/<int:blog_id>', methods=['PUT'])
+@jwt_required()
 def update_blog(blog_id):
     """Update an existing blog entry."""
     blog = Blog.query.get(blog_id)
@@ -119,6 +121,7 @@ def update_blog(blog_id):
     }), status.HTTP_200_OK
 
 @blog_bp.route('/<int:blog_id>', methods=['DELETE'])
+@jwt_required()
 def delete_blog(blog_id):
     """Delete a blog entry."""
     blog = Blog.query.get(blog_id)
