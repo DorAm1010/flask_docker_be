@@ -1,11 +1,8 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import deferred
-from sqlalchemy import Column, Integer, String
-# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, ForeignKey, Integer, String
 from models import db
 
-
-# Base = declarative_base()
 
 class Blog(db.Model):
     __tablename__ = 'blogs'
@@ -13,6 +10,7 @@ class Blog(db.Model):
     title = Column(String(32), nullable=False)
     content = Column(String(128), nullable=False)
     image = Column(String(256))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 
     def __init__(self, title, content, image):

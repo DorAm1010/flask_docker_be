@@ -1,11 +1,8 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.orm import deferred
+from sqlalchemy.orm import deferred, relationship
 from sqlalchemy import Column, Integer, String
-# from sqlalchemy.ext.declarative import declarative_base
 from models import db
 
-
-# Base = declarative_base()
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -13,6 +10,7 @@ class User(db.Model):
     username = Column(String(64), unique=True, nullable=False)
     email = Column(String(120), unique=True, nullable=False)
     password_hash = deferred(Column(String(128), nullable=False))
+    blogs = relationship('Blog', backref='author', cascade="all, delete", lazy=True)
 
 
     def __init__(self, username, email, password):

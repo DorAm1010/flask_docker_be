@@ -1,6 +1,6 @@
 from flask import request, jsonify, Blueprint
 from flask_api import status
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import create_access_token, jwt_required
 from models import db
 from models.user import User
 import json
@@ -42,11 +42,13 @@ def login():
     password = data.get('password')
     user = User.query.filter_by(email=email).first_or_404()
     if user.check_password(password):
+        access_token = create_access_token(identity=user.id)
         return jsonify({
             'message': 'Login successful',
             'user': {
                 'user_id': user.id,
-                'username': user.username
+                'username': user.username,
+                'token': access_token
             }
         }), status.HTTP_200_OK
     return jsonify({
