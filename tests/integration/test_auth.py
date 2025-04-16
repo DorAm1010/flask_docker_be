@@ -12,22 +12,18 @@ def new_user_data():
         "password": "123456"
     }
 
-# def test_register_bad_password(self):
-#     response = self.client.post("/auth/signup", json={
+# def test_register_bad_password(client):
+#     client.post("/auth/signup", json={
 #         "username": "testuser",
 #         "email": "test@example.com",
 #         "password": "123456"
 #     })
-#     self.assertEqual(response.status_code, 201)
-
-
-# def test_login_wrong_password(self, client, new_user_data):
-#     # First register user
-#     response = client.post("/auth/login", json={
-#         "email": new_user_data["email"],
-#         "password": new_user_data["email"][:-1]
+#     res = client.post("/auth/login", json={
+#         "email": "test@example.com",
+#         "password": "12345"
 #     })
-#     self.assertEqual(response.status_code, 401)
+#     assert res.status_code == 409
+
 
 def test_signup(client, new_user_data):
     res = client.post("/auth/signup", json=new_user_data)
@@ -79,4 +75,14 @@ def test_delete_user(client, app, db):
     res = client.delete(f"/auth/delete/{user.id}",
                         headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
+
+def test_login_wrong_password(client, new_user_data):
+    # First register user
+    client.post("/auth/signup", json=new_user_data)
+    response = client.post("/auth/login", json={
+        "email": new_user_data["email"],
+        "password": new_user_data["email"][:-1]
+    })
+    assert response.status_code, 401
+    assert "Invalid credentials" in json.loads(response.data)['message']
 

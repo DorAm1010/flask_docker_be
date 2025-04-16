@@ -2,6 +2,7 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import create_access_token, jwt_required
 from app.models import db
 from app.models.user import User
+from app.utils import is_valid_email, is_valid_password
 
 
 
@@ -15,6 +16,12 @@ def signup():
     password = data.get('password', None)
     if not username or not email or not password:
         return jsonify({"error": "Missing required fields"}), 400
+    if not is_valid_password(password):
+        return jsonify({'error': 'Password must be at least 8 characters long,'
+        ' contain at least one uppercase, one lowecase and a special caracter'}), 400
+    if not is_valid_email(email):
+        return jsonify({'error': 'Invalid email!'}), 400
+
 
     new_user = User(username=username, email=email, password=password)
     if User.query.filter(User.email == email).first():
