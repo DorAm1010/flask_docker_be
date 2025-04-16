@@ -9,7 +9,7 @@ def new_user_data():
     return {
         "username": "testuser",
         "email": "test@example.com",
-        "password": "123456"
+        "password": 'newUser123!'
     }
 
 # def test_register_bad_password(client):

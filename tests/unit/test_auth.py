@@ -10,7 +10,7 @@ def test_signup_missing_fields(client):
 @patch('app.routes.auth_routes.db.session')
 def test_signup_user_already_exists(mock_session, mock_query, client):
     mock_query.filter.return_value.first.return_value = True
-    payload = {"username": "john", "email": "john@example.com", "password": "123"}
+    payload = {"username": "john", "email": "john@example.com", "password": "somPass123!"}
     response = client.post('/auth/signup', json=payload)
     assert response.status_code == 409
     assert b'User with given email already exists' in response.data
@@ -19,7 +19,7 @@ def test_signup_user_already_exists(mock_session, mock_query, client):
 @patch('app.routes.auth_routes.User.query')
 def test_signup_success(mock_query, mock_session, client):
     mock_query.filter.return_value.first.return_value = None
-    payload = {"username": "john", "email": "john@example.com", "password": "123"}
+    payload = {"username": "john", "email": "john@example.com", "password": "somPass123!"}
     response = client.post('/auth/signup', json=payload)
     assert response.status_code == 201
     assert b'created successfully' in response.data
