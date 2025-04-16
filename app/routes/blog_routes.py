@@ -1,8 +1,7 @@
 from flask import request, jsonify, Blueprint
-from flask_api import status
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from models import db
-from models.blog import Blog
+from app.models import db
+from app.models.blog import Blog
 import os
 
 blog_bp = Blueprint('blog', __name__, url_prefix='/blogs')
@@ -43,41 +42,41 @@ def create_blog():
             "content": blog.content,
             "image_url": blog.image_url
         }
-    }), status.HTTP_201_CREATED
+    }), 201
 
 @blog_bp.route('/<int:blog_id>', methods=['GET'])
 def get_blog_by_id(blog_id):
     """Get a single blog entry by its ID."""
     blog = Blog.query.get(blog_id)
     if not blog:
-        return jsonify({"error": "Blog not found"}), status.HTTP_404_NOT_FOUND
+        return jsonify({"error": "Blog not found"}), 404
 
     return jsonify({
         "id": blog.id,
         "title": blog.title,
         "content": blog.content,
         "image_url": blog.image_url
-    }), status.HTTP_200_OK
+    }), 200
 
 @blog_bp.route('/<string:blog_title>', methods=['GET'])
 def get_blog_by_title(blog_title):
     """Get a single blog entry by its ID."""
     blog = Blog.query.get(blog_title)
     if not blog:
-        return jsonify({"error": f"Blog with title {blog_title} not found"}), status.HTTP_404_NOT_FOUND
+        return jsonify({"error": f"Blog with title {blog_title} not found"}), 404
 
     return jsonify({
         "title": blog.title,
         "content": blog.content,
         "image_url": blog.image_url
-    }), status.HTTP_200_OK
+    }), 200
 
 
 @blog_bp.route('/all', methods=['GET'])
 def get_all_blogs():
     """Get a list of all blog entries."""
     blogs = Blog.query.all()
-    return jsonify(blogs), status.HTTP_200_OK
+    return jsonify(blogs), 200
 
 @blog_bp.route('/my-blogs', methods=['GET'])
 @jwt_required()  # This enforces JWT protection on this route.
@@ -118,7 +117,7 @@ def update_blog(blog_id):
             "content": blog.content,
             "image_url": blog.image_url
         }
-    }), status.HTTP_200_OK
+    }), 200
 
 @blog_bp.route('/<int:blog_id>', methods=['DELETE'])
 @jwt_required()
@@ -126,8 +125,8 @@ def delete_blog(blog_id):
     """Delete a blog entry."""
     blog = Blog.query.get(blog_id)
     if not blog:
-        return jsonify({"error": "Blog not found"}), status.HTTP_404_NOT_FOUND
+        return jsonify({"error": "Blog not found"}), 404
 
     db.session.delete(blog)
     db.session.commit()
-    return jsonify({"message": f"Blog {blog_id} deleted successfully!"}), status.HTTP_200_OK
+    return jsonify({"message": f"Blog {blog_id} deleted successfully!"}), 200

@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import deferred
 from sqlalchemy import Column, ForeignKey, Integer, String
-from models import db
+from app.models import db
 
 
 class Blog(db.Model):

@@ -1,9 +1,7 @@
 from flask import request, jsonify, Blueprint
-from flask_api import status
 from flask_jwt_extended import create_access_token, jwt_required
-from models import db
-from models.user import User
-import json
+from app.models import db
+from app.models.user import User
 
 
 
@@ -16,15 +14,15 @@ def signup():
     email = data.get('email', None)
     password = data.get('password', None)
     if not username or not email or not password:
-        return jsonify({"error": "Missing required fields"}), status.HTTP_400_BAD_REQUEST
+        return jsonify({"error": "Missing required fields"}), 400
 
     new_user = User(username=username, email=email, password=password)
     if User.query.filter(User.email == email).first():
-        return jsonify({"error": "User with given email already exists"}), status.HTTP_409_CONFLICT
+        return jsonify({"error": "User with given email already exists"}), 409
 
     db.session.add(new_user)
     db.session.commit()
-    return jsonify({'message': f'User {username} created successfully!'}), status.HTTP_201_CREATED
+    return jsonify({'message': f'User {username} created successfully!'}), 201
 
 
 @auth_bp.route('/<int:user_id>', methods=['GET'])
@@ -33,7 +31,7 @@ def get_user(user_id):
     return jsonify({
         'id': user.id,
         'username': user.username
-    }), status.HTTP_200_OK
+    }), 200
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -50,11 +48,11 @@ def login():
                 'username': user.username,
                 'token': access_token
             }
-        }), status.HTTP_200_OK
+        }), 200
     return jsonify({
         'message': 'Invalid credentials',
         'status': 'error'
-    }), status.HTTP_401_UNAUTHORIZED
+    }), 401
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():
@@ -64,21 +62,35 @@ def logout():
 @auth_bp.route('/delete/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.execute(
+        db.select(User).
+        filter_by(id=user_id).
+        limit(1)
+        ).scalars().first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
     db.session.delete(user)
     db.session.commit()
     return jsonify({"message": f"Deleted user with user_id = {user_id} successfully"}), 200
 
-@auth_bp.route('update/<int:user_id>', methods=['PUT'])
+@auth_bp.route('/update/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
     data = request.get_json()
-    user = User.query.get_or_404(user_id)
+    # user = User.query.get_or_404(user_id)
+    user = db.session.execute(
+        db.select(User).
+        filter_by(id=user_id).
+        limit(1)
+        ).scalars().first()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
     if not username and not email and not password:
-        return jsonify({"error": "No fields to update"}), status.HTTP_400_BAD_REQUEST
+        return jsonify({"error": "No fields to update"}), 400
     
     response_json = {
         "message": "User updated successfully, fields updated: ",
@@ -95,10 +107,10 @@ def update_user(user_id):
         fields.append('password')
     response_json['message'] += ', '.join(fields) + '.'
     db.session.commit()
-    return jsonify(response_json), status.HTTP_200_OK
+    return jsonify(response_json), 200
 
 @auth_bp.route('/all', methods=['GET'])
 def get_all_users():
     users = [u.to_dict() for u in User.query.all()]
-    return jsonify(users), status.HTTP_200_OK
+    return jsonify(users), 200
 

@@ -1,7 +1,7 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import deferred, relationship
 from sqlalchemy import Column, Integer, String
-from models import db
+from app.models import db
 
 
 class User(db.Model):
