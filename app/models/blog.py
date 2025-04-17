@@ -9,14 +9,15 @@ class Blog(db.Model):
     id = Column(Integer, primary_key=True)
     title = Column(String(32), nullable=False)
     content = Column(String(128), nullable=False)
-    image = Column(String(256))
+    image_url = Column(String(256), nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
 
-    def __init__(self, title, content, image):
+    def __init__(self, title, content, image_url, user_id):
         self.title = title
         self.content = content
-        self.image = image
+        self.image_url = image_url
+        self.user_id = user_id
 
     def __repr__(self):
         return f'<Blog {self.title}>'
@@ -25,5 +26,5 @@ class Blog(db.Model):
         return {
             'title': self.title,
             'content': self.content,
-            'image_url': self.image
+            'image_url': self.image_url
         }

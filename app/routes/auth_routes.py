@@ -34,11 +34,8 @@ def signup():
 
 @auth_bp.route('/<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.query.get_or_404(user_id)
-    return jsonify({
-        'id': user.id,
-        'username': user.username
-    }), 200
+    user = User.query.filter_by(id=user_id).first_or_404()
+    return jsonify(user.to_dict()), 200
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
@@ -84,7 +81,6 @@ def delete_user(user_id):
 @jwt_required()
 def update_user(user_id):
     data = request.get_json()
-    # user = User.query.get_or_404(user_id)
     user = db.session.execute(
         db.select(User).
         filter_by(id=user_id).

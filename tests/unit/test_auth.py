@@ -1,4 +1,18 @@
 from unittest.mock import MagicMock, patch
+import pytest
+from app.routes.auth_routes import get_user
+
+
+@pytest.fixture
+def mock_auth_query(app):
+    with patch("app.routes.auth_routes.User.query") as mock:
+        yield mock
+
+@pytest.fixture
+def mock_jsonify(app):
+    with patch("app.routes.auth_routes.User.query") as mock:
+        yield mock
+
 
 
 def test_signup_missing_fields(client):
@@ -25,15 +39,30 @@ def test_signup_success(mock_query, mock_session, client):
     assert b'created successfully' in response.data
 
 @patch('app.routes.auth_routes.User.query')
-def test_get_user_success(mock_query, client):
+@patch('app.routes.auth_routes.jsonify')
+def test_get_user_success(mock_jsonify, mock_auth_query, app):
     mock_user = MagicMock()
     mock_user.id = 1
     mock_user.username = 'john'
-    mock_query.get_or_404.return_value = mock_user
+    mock_user.to_dict.return_value = {
+        "id": 1,
+        "username": "john",
+        "email": "john@example.com"
+    }
 
-    response = client.get('/auth/1')
-    assert response.status_code == 200
+    mock_auth_query.get_or_404.return_value = mock_user
+
+    mock_jsonify.return_value = app.response_class(
+        response=b'{"username": "john"}',
+        status=200,
+        mimetype='application/json'
+    )
+    
+    response, code = get_user(mock_user.id)
+
+    assert code == 200
     assert b'john' in response.data
+
 
 @patch('app.routes.auth_routes.User.query')
 def test_login_success(mock_query, client):

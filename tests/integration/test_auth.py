@@ -1,16 +1,7 @@
 from flask import json
 from flask_jwt_extended import create_access_token
-import pytest
 from sqlalchemy import select
 from app.models.user import User
-
-@pytest.fixture
-def new_user_data():
-    return {
-        "username": "testuser",
-        "email": "test@example.com",
-        "password": 'newUser123!'
-    }
 
 # def test_register_bad_password(client):
 #     client.post("/auth/signup", json={
