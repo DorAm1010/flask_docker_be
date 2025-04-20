@@ -44,7 +44,7 @@ def login():
     password = data.get('password')
     user = User.query.filter_by(email=email).first_or_404()
     if user.check_password(password):
-        access_token = create_access_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
         return jsonify({
             'message': 'Login successful',
             'user': {
